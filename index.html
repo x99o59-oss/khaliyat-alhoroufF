@@ -1,0 +1,148 @@
+
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>خلية الحروف</title>
+<style>
+*{box-sizing:border-box}
+body{margin:0;background:#101a31;color:white;font-family:Tahoma,Arial}
+header{text-align:center;padding:25px;background:#172642;border-bottom:2px solid #d5b45c}
+h1{color:#f5d477;margin:5px;font-size:35px}
+header p{color:#bdc9da}
+.teams{display:flex;gap:12px;justify-content:center;margin:22px auto;max-width:650px;padding:0 12px}
+.team{flex:1;text-align:center;padding:16px;border-radius:15px;background:#1d2d49}
+.team h2{font-size:17px}
+.green{border:2px solid #20bd7d;color:#20bd7d}
+.orange{border:2px solid #f29a38;color:#f29a38}
+.score{font-size:30px;font-weight:bold}
+.board{display:grid;grid-template-columns:repeat(7,1fr);gap:5px;max-width:650px;margin:25px auto;padding:12px}
+.cell{border:0;aspect-ratio:1;background:#344966;color:white;font-size:clamp(16px,3vw,27px);font-weight:bold;clip-path:polygon(25% 5%,75% 5%,100% 50%,75% 95%,25% 95%,0 50%);cursor:pointer}
+.cell.green{background:#20bd7d;color:#063b27}
+.cell.orange{background:#f29a38;color:#492600}
+.actions{text-align:center;margin:20px}
+button.action{border:0;padding:13px 24px;border-radius:10px;margin:5px;font-size:16px;font-weight:bold;cursor:pointer;background:#f5d477;color:#172642}
+#status{text-align:center;color:#c5d2e4}
+.modal{display:none;position:fixed;inset:0;background:#000b;align-items:center;justify-content:center;padding:15px}
+.dialog{background:#1d2d49;border-radius:20px;padding:25px;text-align:center;width:100%;max-width:400px}
+#letter{font-size:55px;color:#f5d477}
+.dialog button{padding:12px;border:0;border-radius:9px;margin:5px;font-weight:bold;cursor:pointer}
+@media(max-width:450px){.board{gap:3px;padding:5px}.teams{gap:6px}.team{padding:10px 4px}}
+</style>
+</head>
+<body>
+<header>
+<h1>خلية الحروف</h1>
+<p>لعبة التحدي والمعرفة</p>
+</header>
+
+<div class="teams">
+<div class="team green"><h2>الفريق الأخضر</h2><div class="score" id="gs">0</div></div>
+<div class="team orange"><h2>الفريق البرتقالي</h2><div class="score" id="os">0</div></div>
+</div>
+
+<div class="board" id="board"></div>
+
+<div class="actions">
+<button class="action" onclick="startGame()">بدء اللعبة</button>
+<button class="action" onclick="resetGame()">إعادة الجولة</button>
+</div>
+<p id="status">اضغط بدء اللعبة للانطلاق</p>
+
+<div class="modal" id="modal">
+<div class="dialog">
+<div id="letter"></div>
+<h2>سؤال الحرف</h2>
+<p id="question"></p>
+<button style="background:#20bd7d;color:#063b27" onclick="award('green')">إجابة صحيحة للأخضر</button>
+<button style="background:#f29a38;color:#492600" onclick="award('orange')">إجابة صحيحة للبرتقالي</button>
+<br>
+<button onclick="closeModal()" style="background:#344966;color:white">إغلاق</button>
+</div>
+</div>
+
+<script>
+const letters=['أ','ب','ت','ث','ج','ح','خ','د','ذ','ر','ز','س','ش','ص','ض','ط','ظ','ع','غ','ف','ق','ك','ل','م','ن','هـ','و','ي'];
+const questions={
+'أ':'اذكر مدينة تبدأ بحرف الألف',
+'ب':'اذكر حيواناً يبدأ بحرف الباء',
+'ت':'اذكر شيئاً في المدرسة بحرف التاء',
+'ث':'اذكر كلمة تبدأ بحرف الثاء',
+'ج':'اذكر دولة تبدأ بحرف الجيم',
+'ح':'اذكر حيواناً يبدأ بحرف الحاء',
+'خ':'اذكر شيئاً في المنزل بحرف الخاء',
+'د':'اذكر مدينة تبدأ بحرف الدال',
+'ذ':'اذكر كلمة تبدأ بحرف الذال',
+'ر':'اذكر نباتاً يبدأ بحرف الراء',
+'ز':'اذكر شيئاً يبدأ بحرف الزاي',
+'س':'اذكر دولة تبدأ بحرف السين',
+'ش':'اذكر شيئاً يبدأ بحرف الشين',
+'ص':'اذكر حيواناً يبدأ بحرف الصاد',
+'ض':'اذكر كلمة تبدأ بحرف الضاد',
+'ط':'اذكر طائراً يبدأ بحرف الطاء',
+'ظ':'اذكر كلمة تبدأ بحرف الظاء',
+'ع':'اذكر مدينة تبدأ بحرف العين',
+'غ':'اذكر شيئاً يبدأ بحرف الغين',
+'ف':'اذكر فاكهة تبدأ بحرف الفاء',
+'ق':'اذكر دولة تبدأ بحرف القاف',
+'ك':'اذكر حيواناً يبدأ بحرف الكاف',
+'ل':'اذكر لوناً يبدأ بحرف اللام',
+'م':'اذكر مدينة تبدأ بحرف الميم',
+'ن':'اذكر نباتاً يبدأ بحرف النون',
+'هـ':'اذكر كلمة تبدأ بحرف الهاء',
+'و':'اذكر شيئاً يبدأ بحرف الواو',
+'ي':'اذكر دولة تبدأ بحرف الياء'
+};
+let started=false,selected=null;
+let scores={green:0,orange:0};
+
+function render(){
+const board=document.getElementById('board');
+board.innerHTML='';
+letters.forEach(letter=>{
+const b=document.createElement('button');
+b.className='cell';
+b.textContent=letter;
+b.onclick=()=>openQuestion(letter,b);
+board.appendChild(b);
+});
+}
+function startGame(){
+started=true;
+document.getElementById('status').textContent='بدأت اللعبة! اختر حرفاً';
+}
+function openQuestion(letter,cell){
+if(!started){alert('اضغط بدء اللعبة أولاً');return}
+if(cell.disabled)return;
+selected=cell;
+document.getElementById('letter').textContent=letter;
+document.getElementById('question').textContent=questions[letter];
+document.getElementById('modal').style.display='flex';
+}
+function award(team){
+if(!selected)return;
+selected.classList.add(team);
+selected.disabled=true;
+scores[team]++;
+document.getElementById(team==='green'?'gs':'os').textContent=scores[team];
+document.getElementById('status').textContent='تم تسجيل النقطة للفريق '+(team==='green'?'الأخضر':'البرتقالي');
+closeModal();
+selected=null;
+}
+function closeModal(){
+document.getElementById('modal').style.display='none';
+}
+function resetGame(){
+scores={green:0,orange:0};
+document.getElementById('gs').textContent=0;
+document.getElementById('os').textContent=0;
+started=false;
+document.getElementById('status').textContent='اضغط بدء اللعبة للانطلاق';
+closeModal();
+render();
+}
+render();
+</script>
+</body>
+</html>
