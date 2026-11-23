@@ -120,16 +120,88 @@ document.getElementById('letter').textContent=letter;
 document.getElementById('question').textContent=questions[letter];
 document.getElementById('modal').style.display='flex';
 }
-function award(team){
-if(!selected)return;
-selected.classList.add(team);
-selected.disabled=true;
-scores[team]++;
-document.getElementById(team==='green'?'gs':'os').textContent=scores[team];
-document.getElementById('status').textContent='تم تسجيل النقطة للفريق '+(team==='green'?'الأخضر':'البرتقالي');
-closeModal();
-selected=null;
+
+function hasWon(team) {
+  const cells = [...document.querySelectorAll('.cell')];
+  const visited = new Set();
+  const queue = [];
+
+  cells.forEach((cell, i) => {
+    const row = Math.floor(i / 7);
+    const col = i % 7;
+
+    if (
+      (team === 'green' && col === 0) ||
+      (team === 'orange' && row === 0)
+    ) {
+      if (cell.classList.contains(team)) {
+        queue.push(i);
+        visited.add(i);
+      }
+    }
+  });
+
+  while (queue.length) {
+    const i = queue.shift();
+    const row = Math.floor(i / 7);
+    const col = i % 7;
+
+    if (
+      (team === 'green' && col === 6) ||
+      (team === 'orange' && row === 3)
+    ) return true;
+
+    const neighbors = row % 2 === 0
+      ? [[0,-1],[0,1],[-1,-1],[-1,0],[1,-1],[1,0]]
+      : [[0,-1],[0,1],[-1,0],[-1,1],[1,0],[1,1]];
+
+    neighbors.forEach(([dr, dc]) => {
+      const nr = row + dr;
+      const nc = col + dc;
+      const ni = nr * 7 + nc;
+
+      if (
+        nr >= 0 && nr < 4 &&
+        nc >= 0 && nc < 7 &&
+        !visited.has(ni) &&
+        cells[ni].classList.contains(team)
+      ) {
+        visited.add(ni);
+        queue.push(ni);
+      }
+    });
+  }
+
+  return false;
 }
+
+function award(team) {
+  if (!selected || !started) return;
+
+  selected.classList.add(team);
+  selected.disabled = true;
+
+  scores[team]++;
+  document.getElementById(team === 'green' ? 'gs' : 'os')
+    .textContent = scores[team];
+
+  closeModal();
+
+  if (hasWon(team)) {
+    started = false;
+    document.getElementById('status').textContent =
+      '🏆 فاز الفريق ' +
+      (team === 'green' ? 'الأخضر' : 'البرتقالي') +
+      '! مبروك الفوز';
+  } else {
+    document.getElementById('status').textContent =
+      'تم تسجيل النقطة للفريق ' +
+      (team === 'green' ? 'الأخضر' : 'البرتقالي');
+  }
+
+  selected = null;
+}
+
 function closeModal(){
 document.getElementById('modal').style.display='none';
 }
