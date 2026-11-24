@@ -125,9 +125,9 @@ body{
  color:white;
 }
 
-/* الفريق الأحمر */
-.hex.red span{
- background:#ed4545;
+/* الفريق البرتقالي */
+.hex.orange span{
+ background:#ff7818;
  color:white;
 }
 </style>
@@ -139,6 +139,7 @@ body{
  جولة جديدة
 </button>
 </div>
+
 
 
 
@@ -173,12 +174,12 @@ function newRound(){
 
    cell.onclick=()=>{
     if(cell.classList.contains('green') ||
-       cell.classList.contains('red')) return;
+       cell.classList.contains('orange')) return;
 
     cell.classList.add(currentTeam);
 
     currentTeam=currentTeam==='green'
-      ? 'red' : 'green';
+      ? 'orange' : 'green';
    };
 
    row.appendChild(cell);
@@ -190,6 +191,7 @@ function newRound(){
 
 newRound();
 </script>
+
 
 
 </body>
