@@ -206,15 +206,7 @@ body{
 <div class="game">
 <div id="board" class="board"></div>
 
-<div class="team-controls" id="teamControls" style="display:none">
- <h3>من فاز بالسؤال؟</h3>
- <button class="team-btn green-btn" onclick="colorSelected('green')">
-  🟢 الفريق الأخضر
- </button>
- <button class="team-btn orange-btn" onclick="colorSelected('orange')">
-  🟠 الفريق البرتقالي
- </button>
-</div>
+
 
 <button onclick="newRound()" class="new-round">
  جولة جديدة
@@ -236,6 +228,7 @@ body{
 
 
 
+
 <script>
 const letters=[
  'ا','ب','ت','ث','ج','ح','خ','د','ذ','ر',
@@ -244,19 +237,15 @@ const letters=[
 ];
 
 const board=document.getElementById('board');
-const teamControls=document.getElementById('teamControls');
 
-let selectedCell=null;
 let gameOver=false;
 let cells=[];
 
 function newRound(){
  board.innerHTML='';
- selectedCell=null;
  gameOver=false;
  cells=[];
 
- teamControls.style.display='none';
  document.getElementById('winnerBox').style.display='none';
 
  const shuffled=[...letters].sort(()=>Math.random()-0.5);
@@ -274,32 +263,51 @@ function newRound(){
    span.textContent=shuffled[r*5+c];
 
    cell.appendChild(span);
-   cells[r][c]=null;
+   cells[r][c]='white';
 
    cell.onclick=()=>{
     if(gameOver) return;
 
-    // الضغط على الحرف الأصفر مرة ثانية يعيده لطبيعته
-    if(selectedCell===cell){
-     cell.classList.remove('selected');
-     selectedCell=null;
-     teamControls.style.display='none';
+    // الأبيض يتحول إلى أصفر
+    if(cells[r][c]==='white'){
+     cells[r][c]='yellow';
+     cell.classList.add('selected');
      return;
     }
 
-    // لا نسمح بتغيير حرف تم تلوينه
-    if(cells[r][c]!==null) return;
+    // الأصفر: الضغطة الأولى تجعله أخضر
+    if(cells[r][c]==='yellow'){
+     cells[r][c]='green';
+     cell.classList.remove('selected');
+     cell.classList.add('green');
 
-    // إلغاء التحديد السابق
-    if(selectedCell){
-     selectedCell.classList.remove('selected');
+     if(checkWinner('green')) showWinner('green');
+     return;
     }
 
-    // تحديد الحرف الجديد
-    selectedCell=cell;
-    cell.classList.add('selected');
-    teamControls.style.display='flex';
+    // الأخضر يبقى ثابتاً
+    if(cells[r][c]==='green') return;
+
+    // البرتقالي يرجع أبيض
+    if(cells[r][c]==='orange'){
+     cells[r][c]='white';
+     cell.classList.remove('orange');
+    }
    };
+
+   // ضغطتان على الأصفر تجعله برتقالياً
+   let pressTimer=null;
+   let pressCount=0;
+
+   cell.addEventListener('dblclick',()=>{
+    if(gameOver || cells[r][c]!=='yellow') return;
+
+    cells[r][c]='orange';
+    cell.classList.remove('selected');
+    cell.classList.add('orange');
+
+    if(checkWinner('orange')) showWinner('orange');
+   });
 
    row.appendChild(cell);
   }
@@ -308,36 +316,19 @@ function newRound(){
  }
 }
 
-function colorSelected(team){
- if(!selectedCell || gameOver) return;
+function showWinner(team){
+ gameOver=true;
 
- const r=[...board.children].findIndex(row=>
-  row.contains(selectedCell)
- );
+ const title=document.getElementById('winnerTitle');
+ title.textContent=team==='green'
+  ? 'فاز الفريق الأخضر! 🟢'
+  : 'فاز الفريق البرتقالي! 🟠';
 
- const c=[...selectedCell.parentElement.children].indexOf(selectedCell);
+ title.style.color=team==='green'
+  ? '#20c96b'
+  : '#ff7818';
 
- selectedCell.classList.remove('selected');
- selectedCell.classList.add(team);
- cells[r][c]=team;
-
- selectedCell=null;
- teamControls.style.display='none';
-
- if(checkWinner(team)){
-  gameOver=true;
-
-  const title=document.getElementById('winnerTitle');
-  title.textContent=team==='green'
-   ? 'فاز الفريق الأخضر! 🟢'
-   : 'فاز الفريق البرتقالي! 🟠';
-
-  title.style.color=team==='green'
-   ? '#20c96b'
-   : '#ff7818';
-
-  document.getElementById('winnerBox').style.display='flex';
- }
+ document.getElementById('winnerBox').style.display='flex';
 }
 
 function checkWinner(team){
@@ -386,6 +377,7 @@ function closeWinner(){
 
 newRound();
 </script>
+
 
 
 
