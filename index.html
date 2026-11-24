@@ -164,10 +164,52 @@ body{
  font-size:18px;
  font-weight:bold;
 }
+.team-controls{
+ display:flex;
+ flex-direction:column;
+ align-items:center;
+ gap:12px;
+}
+
+.team-controls h3{
+ color:white;
+ font-size:20px;
+}
+
+.team-btn{
+ padding:13px 20px;
+ border:0;
+ border-radius:12px;
+ color:white;
+ font-size:17px;
+ font-weight:bold;
+ cursor:pointer;
+}
+
+.green-btn{
+ background:#20c96b;
+}
+
+.orange-btn{
+ background:#ff7818;
+}
 </style>
 </head>
 <body>
 <div class="game">
+  <div class="team-controls">
+ <h3>من فاز بالسؤال؟</h3>
+
+ <button class="team-btn green-btn"
+ onclick="selectTeam('green')">
+ 🟢 الفريق الأخضر
+ </button>
+
+ <button class="team-btn orange-btn"
+ onclick="selectTeam('orange')">
+ 🟠 الفريق البرتقالي
+ </button>
+</div>
 <div id="board" class="board"></div>
 <button onclick="newRound()" class="new-round">
  جولة جديدة
