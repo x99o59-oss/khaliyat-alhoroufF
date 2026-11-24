@@ -173,7 +173,15 @@ body{
  جولة جديدة
 </button>
 </div>
-
+<div class="winner-box" id="winnerBox">
+ <div class="winner-content">
+  <h2 id="winnerTitle">مبروك الفوز!</h2>
+  <p>أحسنتم! فاز الفريق 🎉</p>
+  <button onclick="newRound(); closeWinner();">
+   جولة جديدة
+  </button>
+ </div>
+</div>
 
 
 
@@ -222,12 +230,21 @@ function newRound(){
     cells[r][c]=currentTeam;
 
     if(checkWinner(currentTeam)){
-     gameOver=true;
-     alert(currentTeam==='green'
-      ? 'فاز الفريق الأخضر! 🟢'
-      : 'فاز الفريق البرتقالي! 🟠');
-     return;
-    }
+ gameOver=true;
+
+ const box=document.getElementById('winnerBox');
+ const title=document.getElementById('winnerTitle');
+
+ title.textContent=currentTeam==='green'
+  ? 'فاز الفريق الأخضر! 🟢'
+  : 'فاز الفريق البرتقالي! 🟠';
+
+ title.style.color=currentTeam==='green'
+  ? '#20c96b' : '#ff7818';
+
+ box.style.display='flex';
+ return;
+}
 
     currentTeam=currentTeam==='green'
       ? 'orange' : 'green';
@@ -286,7 +303,9 @@ const neighbors=[
 
  return false;
 }
-
+function closeWinner(){
+ document.getElementById('winnerBox').style.display='none';
+}
 newRound();
 </script>
 
