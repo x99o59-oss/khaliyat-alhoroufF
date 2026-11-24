@@ -108,12 +108,25 @@ body{
  .hex-row:first-child{margin-top:0}
  .hex span{font-size:28px}
 }
-
+.new-round{
+ margin-top:20px;
+ padding:12px 30px;
+ border:0;
+ border-radius:12px;
+ background:#fff;
+ color:#8954ee;
+ font-size:18px;
+ font-weight:bold;
+ cursor:pointer;
+}
 </style>
 </head>
 <body>
 <div class="game">
- <div class="board" id="board"></div>
+<div id="board" class="board"></div>
+<button onclick="newRound()" class="new-round">
+ جولة جديدة
+</button>
 </div>
 
 
