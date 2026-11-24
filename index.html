@@ -143,6 +143,7 @@ body{
 
 
 
+
 <script>
 const letters=[
  'ا','ب','ت','ث','ج','ح','خ','د','ذ','ر',
@@ -152,20 +153,27 @@ const letters=[
 
 const board=document.getElementById('board');
 let currentTeam='green';
+let gameOver=false;
+let cells=[];
 
 function newRound(){
  board.innerHTML='';
  currentTeam='green';
+ gameOver=false;
+ cells=[];
 
  const shuffled=[...letters].sort(()=>Math.random()-0.5);
 
  for(let r=0;r<5;r++){
   const row=document.createElement('div');
   row.className='hex-row';
+  cells[r]=[];
 
   for(let c=0;c<5;c++){
    const cell=document.createElement('div');
    cell.className='hex';
+   cell.dataset.r=r;
+   cell.dataset.c=c;
 
    const span=document.createElement('span');
    span.textContent=shuffled[r*5+c];
@@ -173,15 +181,25 @@ function newRound(){
    cell.appendChild(span);
 
    cell.onclick=()=>{
-    if(cell.classList.contains('green') ||
+    if(gameOver || cell.classList.contains('green') ||
        cell.classList.contains('orange')) return;
 
     cell.classList.add(currentTeam);
+    cells[r][c]=currentTeam;
+
+    if(checkWinner(currentTeam)){
+     gameOver=true;
+     alert(currentTeam==='green'
+      ? 'فاز الفريق الأخضر! 🟢'
+      : 'فاز الفريق البرتقالي! 🟠');
+     return;
+    }
 
     currentTeam=currentTeam==='green'
       ? 'orange' : 'green';
    };
 
+   cells[r][c]=null;
    row.appendChild(cell);
   }
 
@@ -189,8 +207,50 @@ function newRound(){
  }
 }
 
+function checkWinner(team){
+ const visited=new Set();
+ const queue=[];
+
+ for(let i=0;i<5;i++){
+  if(team==='green' && cells[0][i]===team)
+   queue.push([0,i]);
+
+  if(team==='orange' && cells[i][0]===team)
+   queue.push([i,0]);
+ }
+
+ while(queue.length){
+  const [r,c]=queue.shift();
+  const key=r+','+c;
+
+  if(visited.has(key)) continue;
+  visited.add(key);
+
+  if(team==='green' && r===4) return true;
+  if(team==='orange' && c===4) return true;
+
+  const neighbors=[
+   [r,c-1],[r,c+1],
+   [r-1,c],[r+1,c],
+   [r-1,c+(r%2===0?1:-1)],
+   [r+1,c+(r%2===0?1:-1)]
+  ];
+
+  for(const [nr,nc] of neighbors){
+   if(nr>=0 && nr<5 && nc>=0 && nc<5 &&
+      cells[nr][nc]===team &&
+      !visited.has(nr+','+nc)){
+    queue.push([nr,nc]);
+   }
+  }
+ }
+
+ return false;
+}
+
 newRound();
 </script>
+
 
 
 
