@@ -229,6 +229,7 @@ body{
 
 
 
+
 <script>
 const letters=[
  'ا','ب','ت','ث','ج','ح','خ','د','ذ','ر',
@@ -270,28 +271,42 @@ function newRound(){
 
    cell.appendChild(span);
 
+   cells[r][c]=null;
+
    cell.onclick=()=>{
-    if(gameOver || !selectedTeam ||
-       cells[r][c]!==null) return;
+    if(gameOver || !selectedTeam || cells[r][c]!==null){
+     return;
+    }
 
-    cell.classList.add(selectedTeam);
-    cells[r][c]=selectedTeam;
+    const team=selectedTeam;
 
-    if(checkWinner(selectedTeam)){
- gameOver=true;
+    cell.classList.add(team);
+    cells[r][c]=team;
+    selectedTeam=null;
 
- const title=document.getElementById('winnerTitle');
- const box=document.getElementById('winnerBox');
+    if(checkWinner(team)){
+     gameOver=true;
 
- title.textContent=selectedTeam==='green'
-  ? 'فاز الفريق الأخضر! 🟢'
-  : 'فاز الفريق البرتقالي! 🟠';
+     const title=document.getElementById('winnerTitle');
+     const box=document.getElementById('winnerBox');
 
- title.style.color=selectedTeam==='green'
-  ? '#20c96b' : '#ff7818';
+     title.textContent=team==='green'
+      ? 'فاز الفريق الأخضر! 🟢'
+      : 'فاز الفريق البرتقالي! 🟠';
 
- box.style.display='flex';
- box.style.opacity='1';
+     title.style.color=team==='green'
+      ? '#20c96b'
+      : '#ff7818';
+
+     box.style.display='flex';
+    }
+   };
+
+   row.appendChild(cell);
+  }
+
+  board.appendChild(row);
+ }
 }
 
 function checkWinner(team){
@@ -299,11 +314,13 @@ function checkWinner(team){
  const queue=[];
 
  for(let i=0;i<5;i++){
-  if(team==='green' && cells[0][i]===team)
+  if(team==='green' && cells[0][i]===team){
    queue.push([0,i]);
+  }
 
-  if(team==='orange' && cells[i][0]===team)
+  if(team==='orange' && cells[i][0]===team){
    queue.push([i,0]);
+  }
  }
 
  while(queue.length){
@@ -329,9 +346,12 @@ function checkWinner(team){
   ];
 
   for(const [nr,nc] of neighbors){
-   if(nr>=0 && nr<5 && nc>=0 && nc<5 &&
-      cells[nr][nc]===team &&
-      !visited.has(nr+','+nc)){
+   if(
+    nr>=0 && nr<5 &&
+    nc>=0 && nc<5 &&
+    cells[nr][nc]===team &&
+    !visited.has(nr+','+nc)
+   ){
     queue.push([nr,nc]);
    }
   }
@@ -346,6 +366,7 @@ function closeWinner(){
 
 newRound();
 </script>
+
 
 
 
