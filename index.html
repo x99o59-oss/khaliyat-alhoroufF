@@ -278,29 +278,20 @@ function newRound(){
     cells[r][c]=selectedTeam;
 
     if(checkWinner(selectedTeam)){
-     gameOver=true;
+ gameOver=true;
 
-     const title=document.getElementById('winnerTitle');
+ const title=document.getElementById('winnerTitle');
+ const box=document.getElementById('winnerBox');
 
-     title.textContent=selectedTeam==='green'
-      ? 'فاز الفريق الأخضر! 🟢'
-      : 'فاز الفريق البرتقالي! 🟠';
+ title.textContent=selectedTeam==='green'
+  ? 'فاز الفريق الأخضر! 🟢'
+  : 'فاز الفريق البرتقالي! 🟠';
 
-     title.style.color=selectedTeam==='green'
-      ? '#20c96b' : '#ff7818';
+ title.style.color=selectedTeam==='green'
+  ? '#20c96b' : '#ff7818';
 
-     document.getElementById('winnerBox').style.display='flex';
-    }
-
-    selectedTeam=null;
-   };
-
-   cells[r][c]=null;
-   row.appendChild(cell);
-  }
-
-  board.appendChild(row);
- }
+ box.style.display='flex';
+ box.style.opacity='1';
 }
 
 function checkWinner(team){
