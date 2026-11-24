@@ -141,6 +141,7 @@ body{
 </div>
 
 
+
 <script>
 const letters=[
  'ا','ب','ت','ث','ج','ح','خ','د','ذ','ر',
@@ -149,12 +150,13 @@ const letters=[
 ];
 
 const board=document.getElementById('board');
+let currentTeam='green';
 
 function newRound(){
  board.innerHTML='';
+ currentTeam='green';
 
- const shuffled=[...letters]
-  .sort(()=>Math.random()-0.5);
+ const shuffled=[...letters].sort(()=>Math.random()-0.5);
 
  for(let r=0;r<5;r++){
   const row=document.createElement('div');
@@ -168,6 +170,17 @@ function newRound(){
    span.textContent=shuffled[r*5+c];
 
    cell.appendChild(span);
+
+   cell.onclick=()=>{
+    if(cell.classList.contains('green') ||
+       cell.classList.contains('red')) return;
+
+    cell.classList.add(currentTeam);
+
+    currentTeam=currentTeam==='green'
+      ? 'red' : 'green';
+   };
+
    row.appendChild(cell);
   }
 
@@ -177,6 +190,7 @@ function newRound(){
 
 newRound();
 </script>
+
 
 </body>
 </html>
