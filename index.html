@@ -7,6 +7,7 @@
 <title>خلية الحروف</title>
 <style>
 *{box-sizing:border-box}
+
 body{
  margin:0;
  background:#8954ee;
@@ -15,15 +16,33 @@ body{
  display:flex;
  align-items:center;
  justify-content:center;
+ overflow-x:hidden;
 }
+
 .game{
+ position:relative;
  display:flex;
  align-items:center;
  justify-content:center;
  gap:35px;
  flex-wrap:wrap;
  padding:20px;
+ isolation:isolate;
 }
+
+.game::before{
+ content:"";
+ position:absolute;
+ z-index:-1;
+ background:#ff7818;
+ width:90%;
+ height:220px;
+ top:50%;
+ left:5%;
+ transform:translateY(-50%);
+ clip-path:polygon(0 25%,100% 0,100% 75%,0 100%);
+}
+
 .board{
  display:flex;
  flex-direction:column;
