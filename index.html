@@ -228,6 +228,7 @@ body{
 
 
 
+
 <script>
 const letters=[
  'ا','ب','ت','ث','ج','ح','خ','د','ذ','ر',
@@ -236,15 +237,22 @@ const letters=[
 ];
 
 const board=document.getElementById('board');
-let currentTeam='green';
+
+let selectedTeam=null;
 let gameOver=false;
 let cells=[];
 
+function selectTeam(team){
+ selectedTeam=team;
+}
+
 function newRound(){
  board.innerHTML='';
- currentTeam='green';
+ selectedTeam=null;
  gameOver=false;
  cells=[];
+
+ document.getElementById('winnerBox').style.display='none';
 
  const shuffled=[...letters].sort(()=>Math.random()-0.5);
 
@@ -256,8 +264,6 @@ function newRound(){
   for(let c=0;c<5;c++){
    const cell=document.createElement('div');
    cell.className='hex';
-   cell.dataset.r=r;
-   cell.dataset.c=c;
 
    const span=document.createElement('span');
    span.textContent=shuffled[r*5+c];
@@ -265,31 +271,28 @@ function newRound(){
    cell.appendChild(span);
 
    cell.onclick=()=>{
-    if(gameOver || cell.classList.contains('green') ||
-       cell.classList.contains('orange')) return;
+    if(gameOver || !selectedTeam ||
+       cells[r][c]!==null) return;
 
-    cell.classList.add(currentTeam);
-    cells[r][c]=currentTeam;
+    cell.classList.add(selectedTeam);
+    cells[r][c]=selectedTeam;
 
-    if(checkWinner(currentTeam)){
- gameOver=true;
+    if(checkWinner(selectedTeam)){
+     gameOver=true;
 
- const box=document.getElementById('winnerBox');
- const title=document.getElementById('winnerTitle');
+     const title=document.getElementById('winnerTitle');
 
- title.textContent=currentTeam==='green'
-  ? 'فاز الفريق الأخضر! 🟢'
-  : 'فاز الفريق البرتقالي! 🟠';
+     title.textContent=selectedTeam==='green'
+      ? 'فاز الفريق الأخضر! 🟢'
+      : 'فاز الفريق البرتقالي! 🟠';
 
- title.style.color=currentTeam==='green'
-  ? '#20c96b' : '#ff7818';
+     title.style.color=selectedTeam==='green'
+      ? '#20c96b' : '#ff7818';
 
- box.style.display='flex';
- return;
-}
+     document.getElementById('winnerBox').style.display='flex';
+    }
 
-    currentTeam=currentTeam==='green'
-      ? 'orange' : 'green';
+    selectedTeam=null;
    };
 
    cells[r][c]=null;
@@ -322,17 +325,17 @@ function checkWinner(team){
   if(team==='green' && r===4) return true;
   if(team==='orange' && c===4) return true;
 
-  const left = r%2===0 ? -1 : 0;
-const right = r%2===0 ? 0 : 1;
+  const left=r%2===0?-1:0;
+  const right=r%2===0?0:1;
 
-const neighbors=[
- [r,c-1],
- [r,c+1],
- [r-1,c+left],
- [r-1,c+right],
- [r+1,c+left],
- [r+1,c+right]
-];
+  const neighbors=[
+   [r,c-1],
+   [r,c+1],
+   [r-1,c+left],
+   [r-1,c+right],
+   [r+1,c+left],
+   [r+1,c+right]
+  ];
 
   for(const [nr,nc] of neighbors){
    if(nr>=0 && nr<5 && nc>=0 && nc<5 &&
@@ -345,11 +348,14 @@ const neighbors=[
 
  return false;
 }
+
 function closeWinner(){
  document.getElementById('winnerBox').style.display='none';
 }
+
 newRound();
 </script>
+
 
 
 
