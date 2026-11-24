@@ -7,214 +7,104 @@
 <title>خلية الحروف</title>
 <style>
 *{box-sizing:border-box}
-body{margin:0;background:#101a31;color:white;font-family:Tahoma,Arial}
-header{text-align:center;padding:25px;background:#172642;border-bottom:2px solid #d5b45c}
-h1{color:#f5d477;margin:5px;font-size:35px}
-header p{color:#bdc9da}
-.teams{display:flex;gap:12px;justify-content:center;margin:22px auto;max-width:650px;padding:0 12px}
-.team{flex:1;text-align:center;padding:16px;border-radius:15px;background:#1d2d49}
-.team h2{font-size:17px}
-.green{border:2px solid #20bd7d;color:#20bd7d}
-.orange{border:2px solid #f29a38;color:#f29a38}
-.score{font-size:30px;font-weight:bold}
-.board{display:grid;grid-template-columns:repeat(7,1fr);gap:5px;max-width:650px;margin:25px auto;padding:12px}
-.cell{border:0;aspect-ratio:1;background:#344966;color:white;font-size:clamp(16px,3vw,27px);font-weight:bold;clip-path:polygon(25% 5%,75% 5%,100% 50%,75% 95%,25% 95%,0 50%);cursor:pointer}
-.cell.green{background:#20bd7d;color:#063b27}
-.cell.orange{background:#f29a38;color:#492600}
-.actions{text-align:center;margin:20px}
-button.action{border:0;padding:13px 24px;border-radius:10px;margin:5px;font-size:16px;font-weight:bold;cursor:pointer;background:#f5d477;color:#172642}
-#status{text-align:center;color:#c5d2e4}
-.modal{display:none;position:fixed;inset:0;background:#000b;align-items:center;justify-content:center;padding:15px}
-.dialog{background:#1d2d49;border-radius:20px;padding:25px;text-align:center;width:100%;max-width:400px}
-#letter{font-size:55px;color:#f5d477}
-.dialog button{padding:12px;border:0;border-radius:9px;margin:5px;font-weight:bold;cursor:pointer}
-@media(max-width:450px){.board{gap:3px;padding:5px}.teams{gap:6px}.team{padding:10px 4px}}
+body{
+ margin:0;
+ background:#8954ee;
+ font-family:Tahoma;
+ min-height:100vh;
+ display:flex;
+ align-items:center;
+ justify-content:center;
+}
+.game{
+ display:flex;
+ align-items:center;
+ justify-content:center;
+ gap:35px;
+ flex-wrap:wrap;
+ padding:20px;
+}
+.board{
+ display:flex;
+ flex-direction:column;
+ gap:0;
+}
+.hex-row{
+ display:flex;
+ justify-content:center;
+ margin-top:-12px;
+}
+.hex-row:nth-child(even){
+ transform:translateX(43px);
+}
+.hex{
+ width:88px;
+ height:100px;
+ background:#572b83;
+ clip-path:polygon(
+ 25% 0,75% 0,100% 50%,
+ 75% 100%,25% 100%,0 50%
+ );
+ display:grid;
+ place-items:center;
+ padding:5px;
+ border:0;
+}
+.hex span{
+ width:100%;
+ height:100%;
+ background:white;
+ color:#572b83;
+ clip-path:polygon(
+ 25% 0,75% 0,100% 50%,
+ 75% 100%,25% 100%,0 50%
+ );
+ display:grid;
+ place-items:center;
+ font-size:35px;
+ font-weight:bold;
+}
+@media(max-width:600px){
+ .hex{width:65px;height:75px}
+ .hex-row:nth-child(even){transform:translateX(32px)}
+ .hex-row{margin-top:-9px}
+ .hex span{font-size:27px}
+}
 </style>
 </head>
 <body>
-<header>
-<h1>خلية الحروف</h1>
-<p>لعبة التحدي والمعرفة</p>
-</header>
-
-<div class="teams">
-<div class="team green"><h2>الفريق الأخضر</h2><div class="score" id="gs">0</div></div>
-<div class="team orange"><h2>الفريق البرتقالي</h2><div class="score" id="os">0</div></div>
-</div>
-
-<div class="board" id="board"></div>
-
-<div class="actions">
-<button class="action" onclick="startGame()">بدء اللعبة</button>
-<button class="action" onclick="resetGame()">إعادة الجولة</button>
-</div>
-<p id="status">اضغط بدء اللعبة للانطلاق</p>
-
-<div class="modal" id="modal">
-<div class="dialog">
-<div id="letter"></div>
-<h2>سؤال الحرف</h2>
-<p id="question"></p>
-<button style="background:#20bd7d;color:#063b27" onclick="award('green')">إجابة صحيحة للأخضر</button>
-<button style="background:#f29a38;color:#492600" onclick="award('orange')">إجابة صحيحة للبرتقالي</button>
-<br>
-<button onclick="closeModal()" style="background:#344966;color:white">إغلاق</button>
-</div>
+<div class="game">
+ <div class="board" id="board"></div>
 </div>
 
 <script>
-const letters=['أ','ب','ت','ث','ج','ح','خ','د','ذ','ر','ز','س','ش','ص','ض','ط','ظ','ع','غ','ف','ق','ك','ل','م','ن','هـ','و','ي'];
-const questions={
-'أ':'اذكر مدينة تبدأ بحرف الألف',
-'ب':'اذكر حيواناً يبدأ بحرف الباء',
-'ت':'اذكر شيئاً في المدرسة بحرف التاء',
-'ث':'اذكر كلمة تبدأ بحرف الثاء',
-'ج':'اذكر دولة تبدأ بحرف الجيم',
-'ح':'اذكر حيواناً يبدأ بحرف الحاء',
-'خ':'اذكر شيئاً في المنزل بحرف الخاء',
-'د':'اذكر مدينة تبدأ بحرف الدال',
-'ذ':'اذكر كلمة تبدأ بحرف الذال',
-'ر':'اذكر نباتاً يبدأ بحرف الراء',
-'ز':'اذكر شيئاً يبدأ بحرف الزاي',
-'س':'اذكر دولة تبدأ بحرف السين',
-'ش':'اذكر شيئاً يبدأ بحرف الشين',
-'ص':'اذكر حيواناً يبدأ بحرف الصاد',
-'ض':'اذكر كلمة تبدأ بحرف الضاد',
-'ط':'اذكر طائراً يبدأ بحرف الطاء',
-'ظ':'اذكر كلمة تبدأ بحرف الظاء',
-'ع':'اذكر مدينة تبدأ بحرف العين',
-'غ':'اذكر شيئاً يبدأ بحرف الغين',
-'ف':'اذكر فاكهة تبدأ بحرف الفاء',
-'ق':'اذكر دولة تبدأ بحرف القاف',
-'ك':'اذكر حيواناً يبدأ بحرف الكاف',
-'ل':'اذكر لوناً يبدأ بحرف اللام',
-'م':'اذكر مدينة تبدأ بحرف الميم',
-'ن':'اذكر نباتاً يبدأ بحرف النون',
-'هـ':'اذكر كلمة تبدأ بحرف الهاء',
-'و':'اذكر شيئاً يبدأ بحرف الواو',
-'ي':'اذكر دولة تبدأ بحرف الياء'
-};
-let started=false,selected=null;
-let scores={green:0,orange:0};
+const letters=[
+ 'خ','م','ب','ض','ظ',
+ 'ط','ث','ت','ك','ي',
+ 'د','ج','ح','ل','ش',
+ 'ف','ظ','أ','ع','س',
+ 'غ','ق','ر','ز','و'
+];
 
-function render(){
 const board=document.getElementById('board');
-board.innerHTML='';
-letters.forEach(letter=>{
-const b=document.createElement('button');
-b.className='cell';
-b.textContent=letter;
-b.onclick=()=>openQuestion(letter,b);
-board.appendChild(b);
-});
+
+for(let r=0;r<5;r++){
+ const row=document.createElement('div');
+ row.className='hex-row';
+
+ for(let c=0;c<5;c++){
+  const cell=document.createElement('div');
+  cell.className='hex';
+
+  const span=document.createElement('span');
+  span.textContent=letters[r*5+c];
+
+  cell.appendChild(span);
+  row.appendChild(cell);
+ }
+
+ board.appendChild(row);
 }
-function startGame(){
-started=true;
-document.getElementById('status').textContent='بدأت اللعبة! اختر حرفاً';
-}
-function openQuestion(letter,cell){
-if(!started){alert('اضغط بدء اللعبة أولاً');return}
-if(cell.disabled)return;
-selected=cell;
-document.getElementById('letter').textContent=letter;
-document.getElementById('question').textContent=questions[letter];
-document.getElementById('modal').style.display='flex';
-}
-
-function hasWon(team) {
-  const cells = [...document.querySelectorAll('.cell')];
-  const visited = new Set();
-  const queue = [];
-
-  cells.forEach((cell, i) => {
-    const row = Math.floor(i / 7);
-    const col = i % 7;
-
-    if (
-      (team === 'green' && col === 0) ||
-      (team === 'orange' && row === 0)
-    ) {
-      if (cell.classList.contains(team)) {
-        queue.push(i);
-        visited.add(i);
-      }
-    }
-  });
-
-  while (queue.length) {
-    const i = queue.shift();
-    const row = Math.floor(i / 7);
-    const col = i % 7;
-
-    if (
-      (team === 'green' && col === 6) ||
-      (team === 'orange' && row === 3)
-    ) return true;
-
-    const neighbors = row % 2 === 0
-      ? [[0,-1],[0,1],[-1,-1],[-1,0],[1,-1],[1,0]]
-      : [[0,-1],[0,1],[-1,0],[-1,1],[1,0],[1,1]];
-
-    neighbors.forEach(([dr, dc]) => {
-      const nr = row + dr;
-      const nc = col + dc;
-      const ni = nr * 7 + nc;
-
-      if (
-        nr >= 0 && nr < 4 &&
-        nc >= 0 && nc < 7 &&
-        !visited.has(ni) &&
-        cells[ni].classList.contains(team)
-      ) {
-        visited.add(ni);
-        queue.push(ni);
-      }
-    });
-  }
-
-  return false;
-}
-
-function award(team) {
-  if (!selected || !started) return;
-
-  selected.classList.add(team);
-  selected.disabled = true;
-
-  scores[team]++;
-  document.getElementById(team === 'green' ? 'gs' : 'os')
-    .textContent = scores[team];
-
-  closeModal();
-
-  if (hasWon(team)) {
-    started = false;
-    document.getElementById('status').textContent =
-      '🏆 فاز الفريق ' +
-      (team === 'green' ? 'الأخضر' : 'البرتقالي') +
-      '! مبروك الفوز';
-  } else {
-    document.getElementById('status').textContent =
-      'تم تسجيل النقطة للفريق ' +
-      (team === 'green' ? 'الأخضر' : 'البرتقالي');
-  }
-
-  selected = null;
-}
-
-function closeModal(){
-document.getElementById('modal').style.display='none';
-}
-function resetGame(){
-scores={green:0,orange:0};
-document.getElementById('gs').textContent=0;
-document.getElementById('os').textContent=0;
-started=false;
-document.getElementById('status').textContent='اضغط بدء اللعبة للانطلاق';
-closeModal();
-render();
-}
-render();
 </script>
 </body>
 </html>
