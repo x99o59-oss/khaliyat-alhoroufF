@@ -193,24 +193,29 @@ body{
 .orange-btn{
  background:#ff7818;
 }
+
+/* الحرف المحدد */
+.hex.selected span{
+ background:#ffdf35;
+ color:#572b83;
+}
+
 </style>
 </head>
 <body>
 <div class="game">
-  <div class="team-controls">
+<div id="board" class="board"></div>
+
+<div class="team-controls" id="teamControls" style="display:none">
  <h3>من فاز بالسؤال؟</h3>
-
- <button class="team-btn green-btn"
- onclick="selectTeam('green')">
- 🟢 الفريق الأخضر
+ <button class="team-btn green-btn" onclick="colorSelected('green')">
+  🟢 الفريق الأخضر
  </button>
-
- <button class="team-btn orange-btn"
- onclick="selectTeam('orange')">
- 🟠 الفريق البرتقالي
+ <button class="team-btn orange-btn" onclick="colorSelected('orange')">
+  🟠 الفريق البرتقالي
  </button>
 </div>
-<div id="board" class="board"></div>
+
 <button onclick="newRound()" class="new-round">
  جولة جديدة
 </button>
@@ -230,6 +235,7 @@ body{
 
 
 
+
 <script>
 const letters=[
  'ا','ب','ت','ث','ج','ح','خ','د','ذ','ر',
@@ -238,21 +244,19 @@ const letters=[
 ];
 
 const board=document.getElementById('board');
+const teamControls=document.getElementById('teamControls');
 
-let selectedTeam=null;
+let selectedCell=null;
 let gameOver=false;
 let cells=[];
 
-function selectTeam(team){
- selectedTeam=team;
-}
-
 function newRound(){
  board.innerHTML='';
- selectedTeam=null;
+ selectedCell=null;
  gameOver=false;
  cells=[];
 
+ teamControls.style.display='none';
  document.getElementById('winnerBox').style.display='none';
 
  const shuffled=[...letters].sort(()=>Math.random()-0.5);
@@ -270,36 +274,31 @@ function newRound(){
    span.textContent=shuffled[r*5+c];
 
    cell.appendChild(span);
-
    cells[r][c]=null;
 
    cell.onclick=()=>{
-    if(gameOver || !selectedTeam || cells[r][c]!==null){
+    if(gameOver) return;
+
+    // الضغط على الحرف الأصفر مرة ثانية يعيده لطبيعته
+    if(selectedCell===cell){
+     cell.classList.remove('selected');
+     selectedCell=null;
+     teamControls.style.display='none';
      return;
     }
 
-    const team=selectedTeam;
+    // لا نسمح بتغيير حرف تم تلوينه
+    if(cells[r][c]!==null) return;
 
-    cell.classList.add(team);
-    cells[r][c]=team;
-    selectedTeam=null;
-
-    if(checkWinner(team)){
-     gameOver=true;
-
-     const title=document.getElementById('winnerTitle');
-     const box=document.getElementById('winnerBox');
-
-     title.textContent=team==='green'
-      ? 'فاز الفريق الأخضر! 🟢'
-      : 'فاز الفريق البرتقالي! 🟠';
-
-     title.style.color=team==='green'
-      ? '#20c96b'
-      : '#ff7818';
-
-     box.style.display='flex';
+    // إلغاء التحديد السابق
+    if(selectedCell){
+     selectedCell.classList.remove('selected');
     }
+
+    // تحديد الحرف الجديد
+    selectedCell=cell;
+    cell.classList.add('selected');
+    teamControls.style.display='flex';
    };
 
    row.appendChild(cell);
@@ -309,18 +308,45 @@ function newRound(){
  }
 }
 
+function colorSelected(team){
+ if(!selectedCell || gameOver) return;
+
+ const r=[...board.children].findIndex(row=>
+  row.contains(selectedCell)
+ );
+
+ const c=[...selectedCell.parentElement.children].indexOf(selectedCell);
+
+ selectedCell.classList.remove('selected');
+ selectedCell.classList.add(team);
+ cells[r][c]=team;
+
+ selectedCell=null;
+ teamControls.style.display='none';
+
+ if(checkWinner(team)){
+  gameOver=true;
+
+  const title=document.getElementById('winnerTitle');
+  title.textContent=team==='green'
+   ? 'فاز الفريق الأخضر! 🟢'
+   : 'فاز الفريق البرتقالي! 🟠';
+
+  title.style.color=team==='green'
+   ? '#20c96b'
+   : '#ff7818';
+
+  document.getElementById('winnerBox').style.display='flex';
+ }
+}
+
 function checkWinner(team){
  const visited=new Set();
  const queue=[];
 
  for(let i=0;i<5;i++){
-  if(team==='green' && cells[0][i]===team){
-   queue.push([0,i]);
-  }
-
-  if(team==='orange' && cells[i][0]===team){
-   queue.push([i,0]);
-  }
+  if(team==='green' && cells[0][i]===team) queue.push([0,i]);
+  if(team==='orange' && cells[i][0]===team) queue.push([i,0]);
  }
 
  while(queue.length){
@@ -337,21 +363,15 @@ function checkWinner(team){
   const right=r%2===0?0:1;
 
   const neighbors=[
-   [r,c-1],
-   [r,c+1],
-   [r-1,c+left],
-   [r-1,c+right],
-   [r+1,c+left],
-   [r+1,c+right]
+   [r,c-1],[r,c+1],
+   [r-1,c+left],[r-1,c+right],
+   [r+1,c+left],[r+1,c+right]
   ];
 
   for(const [nr,nc] of neighbors){
-   if(
-    nr>=0 && nr<5 &&
-    nc>=0 && nc<5 &&
-    cells[nr][nc]===team &&
-    !visited.has(nr+','+nc)
-   ){
+   if(nr>=0 && nr<5 && nc>=0 && nc<5 &&
+      cells[nr][nc]===team &&
+      !visited.has(nr+','+nc)){
     queue.push([nr,nc]);
    }
   }
@@ -366,6 +386,7 @@ function closeWinner(){
 
 newRound();
 </script>
+
 
 
 
