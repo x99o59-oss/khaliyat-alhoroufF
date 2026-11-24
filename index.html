@@ -229,12 +229,17 @@ function checkWinner(team){
   if(team==='green' && r===4) return true;
   if(team==='orange' && c===4) return true;
 
-  const neighbors=[
-   [r,c-1],[r,c+1],
-   [r-1,c],[r+1,c],
-   [r-1,c+(r%2===0?1:-1)],
-   [r+1,c+(r%2===0?1:-1)]
-  ];
+  const left = r%2===0 ? -1 : 0;
+const right = r%2===0 ? 0 : 1;
+
+const neighbors=[
+ [r,c-1],
+ [r,c+1],
+ [r-1,c+left],
+ [r-1,c+right],
+ [r+1,c+left],
+ [r+1,c+right]
+];
 
   for(const [nr,nc] of neighbors){
    if(nr>=0 && nr<5 && nc>=0 && nc<5 &&
