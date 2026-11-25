@@ -8,9 +8,11 @@
 <style>
 *{box-sizing:border-box}
 
+
 body{
  margin:0;
- background:#8954ee;
+ background:
+  radial-gradient(ellipse at 50% 45%, #6634b5 0%, #32145f 65%, #190b32 100%);
  font-family:Tahoma;
  min-height:100vh;
  display:flex;
@@ -18,6 +20,7 @@ body{
  justify-content:center;
  overflow-x:hidden;
 }
+
 
 .game{
  position:relative;
@@ -30,18 +33,21 @@ body{
  isolation:isolate;
 }
 
+
 .game::before{
  content:"";
  position:absolute;
  z-index:-1;
- background:#ff7818;
- width:90%;
- height:220px;
+ background:linear-gradient(135deg,#ff9b35,#ff641f,#d943ff);
+ width:100%;
+ height:250px;
  top:50%;
- left:5%;
+ left:0;
  transform:translateY(-50%);
  clip-path:polygon(0 25%,100% 0,100% 75%,0 100%);
+ filter:drop-shadow(0 0 20px #ff7818);
 }
+
 
 .board{
  display:flex;
@@ -70,10 +76,11 @@ body{
  transform:translateX(54px);
 }
 
+
 .hex{
  width:110px;
  height:112px;
- background:#572b83;
+ background:linear-gradient(135deg,#b77aff,#5424a0);
  clip-path:polygon(
  25% 0,75% 0,100% 50%,
  75% 100%,25% 100%,0 50%
@@ -81,13 +88,20 @@ body{
  display:grid;
  place-items:center;
  padding:5px;
- border:0;
+ filter:drop-shadow(0 0 8px rgba(190,120,255,.7));
+ transition:transform .2s,filter .2s;
 }
+
+.hex:active{
+ transform:scale(.94);
+}
+
+
 
 .hex span{
  width:100%;
  height:100%;
- background:#fff;
+ background:linear-gradient(145deg,#ffffff,#e8ddff);
  color:#572b83;
  clip-path:polygon(
  25% 0,75% 0,100% 50%,
@@ -97,7 +111,9 @@ body{
  place-items:center;
  font-size:40px;
  font-weight:bold;
+ text-shadow:0 1px 1px rgba(0,0,0,.12);
 }
+
 
 @media(max-width:600px){
  .hex{width:67px;height:76px}
@@ -108,33 +124,51 @@ body{
  .hex-row:first-child{margin-top:0}
  .hex span{font-size:28px}
 }
+
 .new-round{
  margin-top:20px;
- padding:12px 30px;
- border:0;
- border-radius:12px;
- background:#fff;
- color:#8954ee;
+ padding:15px 35px;
+ border:2px solid #d9b8ff;
+ border-radius:15px;
+ background:linear-gradient(135deg,#b66aff,#7135c7);
+ color:white;
  font-size:18px;
  font-weight:bold;
  cursor:pointer;
+ box-shadow:0 0 12px #a95aff,0 0 25px rgba(169,90,255,.4);
+ transition:.2s;
 }
+
+.new-round:active{
+ transform:scale(.95);
+}
+
+/* الفريق الأخضر */
+/* الحرف الأصفر */
+.hex.selected span{
+ background:linear-gradient(145deg,#fff36a,#ffc928);
+ color:#533300;
+}
+
 /* الفريق الأخضر */
 .hex.green span{
- background:#20c96b;
+ background:linear-gradient(145deg,#42f59b,#08a85b);
  color:white;
 }
 
 /* الفريق البرتقالي */
 .hex.orange span{
- background:#ff7818;
+ background:linear-gradient(145deg,#ffad55,#ff6418);
  color:white;
 }
+
+/* شاشة الفوز */
 .winner-box{
  display:none;
  position:fixed;
  inset:0;
- background:rgba(0,0,0,.75);
+ background:rgba(10,4,25,.85);
+ backdrop-filter:blur(8px);
  z-index:100;
  align-items:center;
  justify-content:center;
@@ -142,12 +176,13 @@ body{
 }
 
 .winner-content{
- background:white;
+ background:linear-gradient(145deg,#fff,#eee5ff);
  padding:35px 25px;
- border-radius:22px;
+ border-radius:25px;
  text-align:center;
  width:100%;
  max-width:330px;
+ box-shadow:0 0 35px rgba(190,120,255,.5);
 }
 
 .winner-content h2{
@@ -156,53 +191,78 @@ body{
 }
 
 .winner-content button{
- background:#8954ee;
+ background:linear-gradient(135deg,#a45cff,#6631bd);
  color:white;
  border:0;
  padding:13px 25px;
  border-radius:12px;
  font-size:18px;
  font-weight:bold;
-}
-.team-controls{
- display:flex;
- flex-direction:column;
- align-items:center;
- gap:12px;
-}
-
-.team-controls h3{
- color:white;
- font-size:20px;
-}
-
-.team-btn{
- padding:13px 20px;
- border:0;
- border-radius:12px;
- color:white;
- font-size:17px;
- font-weight:bold;
  cursor:pointer;
 }
 
-.green-btn{
- background:#20c96b;
+.game-title{
+ position:absolute;
+ top:25px;
+ left:0;
+ right:0;
+ width:100%;
+ text-align:center;
+ z-index:2;
 }
 
-.orange-btn{
- background:#ff7818;
+.game-title h1{
+ color:white;
+ font-size:38px;
+ margin:0 0 10px;
+ text-shadow:
+ 0 0 8px #c58aff,
+ 0 0 20px #a34dff,
+ 0 0 35px #8b35ff;
 }
 
-/* الحرف المحدد */
-.hex.selected span{
- background:#ffdf35;
- color:#572b83;
+.game-title p{
+ color:#e7d7ff;
+ font-size:15px;
+ margin:0;
+}
+
+.game{
+ margin-top:100px;
+}
+
+@media(max-width:600px){
+ .game-title h1{
+  font-size:30px;
+ }
+}
+@media(max-width:600px){
+ .game{
+  width:100%;
+  padding:15px 8px;
+  margin-top:90px;
+  gap:20px;
+ }
+
+ .game::before{
+  width:96%;
+  left:2%;
+  height:190px;
+ }
+
+ .new-round{
+  width:80%;
+  max-width:280px;
+ }
 }
 
 </style>
 </head>
 <body>
+  <div class="game-title">
+ <h1>خلية الحروف</h1>
+ <p>تحدّى منافسك واربط الحروف للفوز!</p>
+</div>
 <div class="game">
 <div id="board" class="board"></div>
 
