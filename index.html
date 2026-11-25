@@ -264,7 +264,64 @@ body{
  0 0 15px rgba(180,110,255,.25),
  inset 0 0 15px rgba(180,110,255,.15);
 }
+@keyframes fadeInGame{
+ from{
+  opacity:0;
+  transform:translateY(20px);
+ }
+ to{
+  opacity:1;
+  transform:translateY(0);
+ }
+}
 
+.game{
+ animation:fadeInGame .8s ease-out;
+}
+
+.game-title{
+ animation:fadeInGame 1s ease-out;
+}
+
+.hex{
+ animation:fadeInGame .5s ease-out both;
+}
+.game{
+ width:100%;
+ max-width:900px;
+ min-height:80vh;
+ margin-top:110px;
+ padding:25px 15px;
+}
+
+.game-title{
+ top:25px;
+}
+
+.board{
+ position:relative;
+ z-index:1;
+}
+
+@media(max-width:600px){
+ body{
+  align-items:flex-start;
+ }
+
+ .game{
+  margin-top:105px;
+  min-height:auto;
+  padding:20px 5px;
+ }
+
+ .board{
+  padding:10px 5px;
+ }
+
+ .hex-row:nth-child(even){
+  transform:translateX(30px);
+ }
+}
 </style>
 </head>
 <body>
